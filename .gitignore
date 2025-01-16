@@ -1,0 +1,9 @@
+
+# Ignorar entornos virtuales
+.venv/
+
+# Ignorar configuraciones de pycharm
+.idea/
+
+#ignorar archivos de cache de python
+__pycache__/

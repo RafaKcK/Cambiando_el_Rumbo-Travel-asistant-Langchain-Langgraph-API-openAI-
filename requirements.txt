@@ -1,0 +1,11 @@
+uvicorn~=0.34.0
+fastapi~=0.115.6
+pydantic~=2.10.5
+langchain-core~=0.3.29
+langchain~=0.3.14
+python-dotenv~=1.0.1
+langchain-openai~=0.2.14
+langdetect~=1.0.9
+translatepy~=2.3
+geopy~=2.4.1
+langgraph~=0.2.61

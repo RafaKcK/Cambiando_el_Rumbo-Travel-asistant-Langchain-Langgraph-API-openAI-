@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cambiando el Rumbo - Asistente de Viajes</title>
+  <link rel="icon" href="/static/ave.ico" type="image/x-icon" />
+
+  <!-- Estilos CSS integrados -->
+  <style>
+    /* Reiniciar márgenes y padding por defecto */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: url("/static/avion.webp") no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.9); /* Fondo semitransparente */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      justify-content: center;
+      position: relative;
+    }
+
+    #icono {
+      width: 50px;
+      height: 50px;
+      margin-right: 15px;
+    }
+
+    #titulo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #444;
+    }
+
+    /* Botón para mostrar/ocultar info */
+    #btn-info, #btn-bugs {
+      position: absolute;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+
+    #btn-info {
+      right: 0;
+    }
+
+    #btn-bugs {
+      left: 0;
+    }
+
+    #info-panel, #bugs-panel {
+      display: none; /* Inicialmente oculto */
+      background-color: #f7f7f7;
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+    }
+
+    /* Estilo del contenedor de chat */
+    .chat-box {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      overflow-y: auto;
+      background-color: #fff;
+      margin-bottom: 10px;
+    }
+
+    /* Mensajes del chat */
+    .message {
+      margin: 5px 0;
+      padding: 8px 12px;
+      border-radius: 4px;
+      max-width: 80%;
+      line-height: 1.4;
+    }
+
+    .user-msg {
+      background-color: #cce5ff;
+      align-self: flex-end;
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .bot-msg {
+      background-color: #e2e2e2;
+      align-self: flex-start;
+      margin-right: auto;
+      text-align: left;
+    }
+
+    /* Contenedor para input y botón */
+    .input-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    #user-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #send-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #send-btn:hover {
+      background-color: #45a049;
+    }
+
+    /* Controles de volumen */
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    #volume-slider {
+      width: 100px;
+    }
+
+    #mute-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    /* Boton idioma */
+
+    #btn-idioma{
+      position: absolute;
+      right: 420px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-left: auto;
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- Reproducción de música de fondo en bucle -->
+  <audio id="bg-audio" src="/static/cafe-piano.mp3" autoplay loop></audio>
+
+  <div class="container">
+
+    <!-- Cabecera con icono, título y botones info y bugs -->
+    <header>
+      <img id="icono" src="/static/ave.ico" alt="Icono Asistente" />
+      <h1 id="titulo">Asistente de Viajes - Cambiando el Rumbo</h1>
+      <button id="btn-info">Info</button>
+      <button id="btn-bugs">Bugs</button>
+    </header>
+
+    <!-- Panel desplegable con info de uso -->
+    <div id="info-panel">
+      <h3>Instrucciones y Consejos - Este asistente puede ayudarte a planificar tu viaje. Algunas sugerencias:</h3>
+      <br>
+      <ul>
+        <li><strong>Si se actualiza la página se borra el chat, no guarda información en una base de datos, solo interactúa mientras se opere en esta sesión de chat.</strong></li>
+        <li>El Agente de viajes está especializado en 11 temas:Historia, costumbres, destinos, gastronomía, actividades, logística, medioambiente, souvenirs, eventos, legalidad e itinerarios.</li>
+        <li>Puedes preguntar: <em>"Recomiéndame actividades en Tokio"</em>, <em>"Quiero un itinerario de 5 días"</em>, etc.</li>
+        <li>Si necesitas rutas o mapas, menciona <strong>"ubicación"</strong> o <strong>"ruta"</strong>.</li>
+        <li>El asistente responde en varios idiomas, ya que tiene funciones de traducción según el idioma con el que se interactúe.</li>
+        <li>En caso de error, prueba reformular tu pregunta.</li>
+        <li>Es <strong>muy importante</strong> formular la consulta correctamente, para una contestación fluida del asistente.</li>
+        <li>Escribe <strong>preguntas claras</strong> relacionadas con viajes y logística. Cualquier otra no será contestada.</li>
+        <li><strong>Importante:</strong> Según del tipo de consulta, el modelo puede tardar más o menos en realizar una respuesta, dependiendo de las consultas internas que deba de realizar y como se le estructure la información. !Paciencia¡ :)</li>
+      </ul>
+      <br>
+      <p>¡Disfruta usando el asistente!</p>
+    </div>
+
+    <!-- Panel desplegable con información sobre errores o bugs -->
+    <div id="bugs-panel">
+      <h3>Posibles errores y soluciones</h3>
+      <br>
+      <ul>
+        <li><strong>Muy importante: Este proyecto utiliza la api de openAI, que es de pago, por lo que si tras tiempo de uso se agotan los tokens, dejará de estar disponible la interacción del chat.</strong></li>
+        <li>Si no puedes obtener una respuesta, prueba con una pregunta más clara o específica. El asistente puede no entender correctamente o repetir respuestas.</li>
+        <li>En ocasiones la memoria, para gestionarse, genera un resumen y elimina mensajes antiguos, por lo que puede perderse algo de información o contexto en su proceso de almacenamiento.</li>
+        <li>Si encuentras un error en las rutas o mapas, por favor, intenta reformular tu solicitud. En ocasiones falla si no encuentra el destino o es muy complejo</li>
+        <li>Si el audio no funciona, asegúrate de que tu navegador permite la reproducción automática de música, O que has aceptado los permisos del navegador.</li>
+        <li>En ocasiones, y si la pregunta no se formula correctamente, la detección de idioma puede entender que se está consultando en otro idioma al del usuario y responder en consecuencia.</li>
+        <li>Debido a las instrucciones del prompt, algunas respuestas pueden tener una estructura extraña.</li>
+        <li>En algunas respuestas, al generar un itinerario, puede fallar el agente al entender el número de días o tiempo de viaje.</li>
+      </ul>
+      <br>
+      <p>Disculpen las molestias, estamos trabajando para mejorar la experiencia de uso. 🙏</p>
+    </div>
+
+    <!-- Boton idioma-->
+     <div>
+       <button id="btn-idioma">English</button>
+     </div>
+
+    <!-- Controles de volumen -->
+    <div class="audio-controls">
+      <label for="volume-slider">Vol.:</label>
+      <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1" />
+      <button id="mute-btn">Mute</button>
+    </div>
+
+    <!-- Contenedor del chat -->
+    <div class="chat-box" id="chat-box"></div>
+
+    <!-- Input y botón para enviar -->
+    <div class="input-container">
+      <input type="text" id="user-input" placeholder="Escribe tu pregunta..." />
+      <button id="send-btn">Enviar</button>
+    </div>
+  </div>
+
+  <!-- JavaScript embebido -->
+  <script>
+    // Referencias a elementos del DOM
+    const btnInfo = document.getElementById('btn-info');
+    const infoPanel = document.getElementById('info-panel');
+    const btnBugs = document.getElementById('btn-bugs');
+    const bugsPanel = document.getElementById('bugs-panel');
+    const btnIdioma = document.getElementById("btn-idioma");
+
+    // Evento para mostrar/ocultar el panel de info
+    btnInfo.addEventListener('click', () => {
+      if (infoPanel.style.display === 'none' || infoPanel.style.display === '') {
+        infoPanel.style.display = 'block';
+      } else {
+        infoPanel.style.display = 'none';
+      }
+    });
+
+    // Evento para mostrar/ocultar el panel de bugs
+    btnBugs.addEventListener('click', () => {
+      if (bugsPanel.style.display === 'none' || bugsPanel.style.display === '') {
+        bugsPanel.style.display = 'block';
+      } else {
+        bugsPanel.style.display = 'none';
+      }
+    });
+
+    // Chat
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function addMessageToChat(rawText, isUser = true) {
+      // Eliminar placeholders
+      let message = rawText.replace(/###/g, "");
+
+      // Convertir URLs en hipervínculos clicables
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      message = message.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+
+      // Reemplazar saltos de línea \n por <br>
+      message = message.replace(/\n/g, "<br>");
+
+      // Crear el div para el mensaje
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', isUser ? 'user-msg' : 'bot-msg');
+
+      // Insertar el HTML que hemos procesado
+      msgDiv.innerHTML = message;
+
+      // Añadirlo al chat
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Manejo del botón "Enviar"
+    sendBtn.addEventListener('click', async () => {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      // Mostrar el mensaje del usuario en el chat
+      addMessageToChat(text, true);
+
+      // Limpiar el input
+      userInput.value = '';
+
+      try {
+        // Hacer fetch al endpoint de tu API FastAPI
+        const response = await fetch("http://127.0.0.1:8000/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message: text })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          addMessageToChat(`Error: ${errorData.detail}`, false);
+          return;
+        }
+
+        const data = await response.json();
+        addMessageToChat(data.response, false);
+
+      } catch (error) {
+        addMessageToChat("Error de conexión con el servidor.", false);
+      }
+    });
+
+    // Opcional: enviar con Enter
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        sendBtn.click();
+      }
+    });
+
+    /* ------------------------
+       Controles de Audio
+    ------------------------ */
+    const bgAudio = document.getElementById('bg-audio');
+    const volumeSlider = document.getElementById('volume-slider');
+    const muteBtn = document.getElementById('mute-btn');
+
+    // Cambiar volumen en tiempo real
+    volumeSlider.addEventListener('input', () => {
+      bgAudio.volume = volumeSlider.value;
+    });
+
+    // Mute/Unmute
+    let isMuted = false;
+    muteBtn.addEventListener('click', () => {
+      if (!isMuted) {
+        bgAudio.muted = true;
+        muteBtn.textContent = "Unmute";
+        isMuted = true;
+      } else {
+        bgAudio.muted = false;
+        muteBtn.textContent = "Mute";
+        isMuted = false;
+      }
+    });
+
+    // Traducciones
+    const translations = {
+      es: {
+        titulo: "Asistente de Viajes - Cambiando el Rumbo",
+        btnIdioma: "English",
+        pestaña: "Asistente de Viajes - Cambiando el Rumbo",
+        enviar: "Enviar",
+        placeholder: "Escribe tu pregunta...",
+        infoPanel: `
+          <h3>Instrucciones y Consejos - Este asistente puede ayudarte a planificar tu viaje. Algunas sugerencias:</h3>
+          <br>
+          <ul>
+            <li><strong>Si se actualiza la página se borra el chat, no guarda información en una base de datos, solo interactúa mientras se opere en esta sesión de chat.</strong></li>
+            <li>El Agente de viajes está especializado en 11 temas:Historia, costumbres, destinos, gastronomía, actividades, logística, medioambiente, souvenirs, eventos, legalidad e itinerarios.</li>
+            <li>Puedes preguntar: <em>"Recomiéndame actividades en Tokio"</em>, <em>"Quiero un itinerario de 5 días"</em>, etc.</li>
+            <li>Si necesitas rutas o mapas, menciona <strong>"ubicación"</strong> o <strong>"ruta"</strong>.</li>
+            <li>El asistente responde en varios idiomas, ya que tiene funciones de traducción según el idioma con el que se interactúe.</li>
+            <li>En caso de error, prueba reformular tu pregunta.</li>
+            <li>Es <strong>muy importante</strong> formular la consulta correctamente, para una contestación fluida del asistente.</li>
+            <li>Escribe <strong>preguntas claras</strong> relacionadas con viajes y logística. Cualquier otra no será contestada.</li>
+            <li><strong>Importante:</strong> Según del tipo de consulta, el modelo puede tardar más o menos en realizar una respuesta, dependiendo de las consultas internas que deba de realizar y como se le estructure la información. ¡Paciencia! :)</li>
+          </ul>
+          <br>
+          <p>¡Disfruta usando el asistente!</p>
+        `,
+        bugsPanel: `
+          <h3>Posibles errores y soluciones</h3>
+          <br>
+          <ul>
+            <li><strong>Muy importante: Este proyecto utiliza la API de OpenAI, que es de pago, por lo que si tras tiempo de uso se agotan los tokens, dejará de estar disponible la interacción del chat.</strong></li>
+            <li>Si no puedes obtener una respuesta, prueba con una pregunta más clara o específica. El asistente puede no entender correctamente o repetir respuestas.</li>
+            <li>En ocasiones la memoria, para gestionarse, genera un resumen y elimina mensajes antiguos, por lo que puede perderse algo de información o contexto en su proceso de almacenamiento.</li>
+            <li>Si encuentras un error en las rutas o mapas, por favor, intenta reformular tu solicitud. En ocasiones falla si no encuentra el destino o es muy complejo.</li>
+            <li>Si el audio no funciona, asegúrate de que tu navegador permite la reproducción automática de música, o que has aceptado los permisos del navegador.</li>
+            <li>En ocasiones, y si la pregunta no se formula correctamente, la detección de idioma puede entender que se está consultando en otro idioma al del usuario y responder en consecuencia.</li>
+            <li>Debido a las instrucciones del prompt, algunas respuestas pueden tener una estructura extraña.</li>
+            <li>En algunas respuestas, al generar un itinerario, puede fallar el agente al entender el número de días o tiempo de viaje.</li>
+          </ul>
+          <br>
+          <p>Disculpen las molestias, estamos trabajando para mejorar la experiencia de uso. 🙏</p>
+        `
+      },
+      en: {
+        titulo: "Travel Assistant - Changing Course",
+        btnIdioma: "Español",
+        pestaña: "Travel Assistant - Changing Course",
+        enviar: "Send",
+        placeholder: "Type your question...",
+        infoPanel: `
+          <h3>Instructions and Tips - This assistant can help you plan your trip. Some suggestions:</h3>
+          <br>
+          <ul>
+            <li><strong>If the page is refreshed, the chat will be cleared. It does not save information in a database; it only interacts while the chat session is active.</strong></li>
+            <li>The travel agent specializes in 11 topics: history, customs, destinations, gastronomy, activities, logistics, environment, souvenirs, events, legality, and itineraries.</li>
+            <li>You can ask: <em>"Recommend me activities in Tokyo"</em>, <em>"I want a 5-day itinerary"</em>, etc.</li>
+            <li>If you need routes or maps, mention <strong>"location"</strong> or <strong>"route"</strong>.</li>
+            <li>The assistant responds in various languages, as it has translation features based on the interaction language.</li>
+            <li>In case of error, try rephrasing your question.</li>
+            <li>It is <strong>very important</strong> to formulate your query correctly for a smooth response from the assistant.</li>
+            <li>Write <strong>clear questions</strong> related to travel and logistics. Other types of questions will not be answered.</li>
+            <li><strong>Important:</strong> Depending on the query type, the model may take longer or shorter to respond, based on the internal queries it needs to perform and how the information is structured. Be patient! :)</li>
+          </ul>
+          <br>
+          <p>Enjoy using the assistant!</p>
+        `,
+        bugsPanel: `
+          <h3>Possible Errors and Solutions</h3>
+          <br>
+          <ul>
+            <li><strong>Very important: This project uses the OpenAI API, which is paid. If the tokens are exhausted after prolonged use, the chat interaction will no longer be available.</strong></li>
+            <li>If you cannot get a response, try asking a clearer or more specific question. The assistant may not understand correctly or repeat answers.</li>
+            <li>Sometimes the memory generates a summary and deletes old messages to manage itself, so some information or context may be lost in the process.</li>
+            <li>If you encounter an error in routes or maps, please try reformulating your request. It sometimes fails if it cannot find the destination or it is too complex.</li>
+            <li>If the audio doesn't work, ensure your browser allows automatic music playback or that you've accepted the browser permissions.</li>
+            <li>Sometimes, if the question is not properly formulated, the language detection may assume the query is in another language and respond accordingly.</li>
+            <li>Due to the prompt instructions, some responses may have a strange structure.</li>
+            <li>In some responses, when generating an itinerary, the agent may fail to understand the number of days or travel time.</li>
+          </ul>
+          <br>
+          <p>We apologize for any inconvenience. We are working to improve the user experience. 🙏</p>
+        `
+      },
+    };
+
+    // Idioma actual
+    let currentLang = "es";
+
+    // Evento de cambio de idioma
+    btnIdioma.addEventListener("click", () => {
+      // Alternar entre español e inglés
+      currentLang = currentLang === "es" ? "en" : "es";
+
+      // Actualizar el texto del título y el botón
+      document.getElementById("titulo").textContent = translations[currentLang].titulo;
+      btnIdioma.textContent = translations[currentLang].btnIdioma;
+
+      // Actualizar el texto de la pestaña
+      document.title = translations[currentLang].pestaña;
+
+      // Actualizar el botón de enviar y el placeholder
+      document.getElementById("send-btn").textContent = translations[currentLang].enviar;
+      document.getElementById("user-input").placeholder = translations[currentLang].placeholder;
+
+      // Actualizar los paneles de info y bugs
+      document.getElementById("info-panel").innerHTML = translations[currentLang].infoPanel;
+      document.getElementById("bugs-panel").innerHTML = translations[currentLang].bugsPanel;
+    });
+  </script>
+</body>
+</html>
