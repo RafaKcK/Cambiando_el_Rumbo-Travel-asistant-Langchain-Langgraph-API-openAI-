@@ -6,7 +6,6 @@ langchain~=0.3.14
 python-dotenv~=1.0.1
 langchain-openai~=0.2.14
 langdetect~=1.0.9
-Jinja2==3.1.5
 translatepy~=2.3
 geopy~=2.4.1
 langgraph~=0.2.61
