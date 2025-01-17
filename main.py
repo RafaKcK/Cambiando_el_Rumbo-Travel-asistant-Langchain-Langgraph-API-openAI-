@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+import os
 
 # Importaciones para el uso del chat con langchain
 from langchain_core.messages import HumanMessage
@@ -16,14 +17,15 @@ app = FastAPI(title='Asistente de viajes (Cambiando el Rumbo)', version='1.0.0')
 # Montamos la carpeta static para que sea accesible en la ruta /static
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Configuramos la carpeta de plantillas /templates
-templates = Jinja2Templates(directory="templates")
+# Define la ruta absoluta de la carpeta 'templates'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 class ChatRequest(BaseModel):
     message: str
 
 @app.get("/", response_class=HTMLResponse)
-def root(request: Request):
+async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 # Endpoint para el chatbot
